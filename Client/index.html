@@ -1,10 +1,58 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Charset -->
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="/logo.png" />
+
+    <!-- Mobile Responsive -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>client</title>
+
+    <!-- Apply saved theme before paint (default: light — never auto OS dark) -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("lms-theme");
+          if (t !== "dark") t = "light";
+          if (t === "dark") document.documentElement.classList.add("dark");
+          else document.documentElement.classList.remove("dark");
+          document.documentElement.style.colorScheme = t;
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Primary Meta Tags -->
+    <title>SMIT Portal - Saylani Welfare Int Trust</title>
+    <meta name="title" content="SMIT Portal - Saylani Welfare Int Trust" />
+    <meta
+      name="description"
+      content="Login to the SMIT Portal - LMS by Saylani Welfare. Access courses, classes, results, and resources to manage your learning journey."
+    />
+    <meta
+      name="keywords"
+      content="SMIT, student portal,trainer portal, LMS, Learning Management System, Saylani, Saylani Welfare, education, classes, results, online learning"
+    />
+    <meta name="author" content="Saylani Welfare Int Trust" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SMIT Portal - Saylani Welfare Int Trust" />
+    <meta
+      property="og:description"
+      content="Login to the SMIT Portal - LMS powered by Saylani Welfare. Manage classes, results, and online learning resources with ease."
+    />
+    <meta property="og:image" content="/logo.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="SMIT Portal - Saylani Welfare Int Trust" />
+    <meta
+      property="twitter:description"
+      content="Login to the SMIT Portal LMS powered by Saylani Welfare. Access courses, results, and resources."
+    />
+    <meta property="twitter:image" content="/logo.png" />
   </head>
   <body>
     <div id="root"></div>

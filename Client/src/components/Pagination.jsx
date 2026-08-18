@@ -1,42 +1,33 @@
-import React from 'react';
-import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 
-const Pagination = ({ className = '' }) => {
+
+const Pagination = ({
+  currentPage = 1,
+  totalPages = 5,
+  onPageChange = () => {},
+}) => {
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+
   return (
-    <div className={`flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 ${className}`}>
-      <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-gray-700">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">4</span> of{' '}
-            <span className="font-medium">45</span> students
-          </p>
-        </div>
-        <div>
-          <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-            <a href="#" className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-              <span className="sr-only">Previous</span>
-              <LuChevronLeft className="h-4 w-4" aria-hidden="true" />
-            </a>
-            {/* Current: "z-10 bg-emerald-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600", Default: "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0" */}
-            <a href="#" aria-current="page" className="relative z-10 inline-flex items-center border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-600 focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
-              1
-            </a>
-            <a href="#" className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-              2
-            </a>
-            <a href="#" className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-              3
-            </a>
-            <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
-              ...
-            </span>
-            <a href="#" className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-              <span className="sr-only">Next</span>
-              <LuChevronRight className="h-4 w-4" aria-hidden="true" />
-            </a>
-          </nav>
-        </div>
+    <div className="flex items-center justify-between gap-3 border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+      <div className="text-sm text-gray-600">
+        Page {currentPage} of {totalPages}
       </div>
+      <nav className="flex items-center gap-2">
+        {pages.map((page) => (
+          <button
+            key={page}
+            type="button"
+            onClick={() => onPageChange(page)}
+            className={`inline-flex h-9 min-w-[2rem] items-center justify-center rounded-md border px-3 text-sm transition ${
+              page === currentPage
+                ? "border-blue-600 bg-blue-600 text-white"
+                : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 };

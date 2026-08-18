@@ -1,19 +1,21 @@
-// POST
-//    ↓
-// createStudent
+import express from "express";
+import {
+  createStudentController,
+  deleteStudentController,
+  getStudentByIdController,
+  getStudentController,
+  getStudentProfileController,
+  updateStudentController,
+} from "../controllers/student.controller.js";
 
-// GET
-//    ↓
-// getStudents
+const studentRoutes = express.Router();
 
-// GET /:id
-//    ↓
-// getStudentById
+studentRoutes.post("/", createStudentController);
+studentRoutes.get("/", getStudentController);
+// More specific than /:id
+studentRoutes.get("/:id/profile", getStudentProfileController);
+studentRoutes.get("/:id", getStudentByIdController);
+studentRoutes.put("/:id", updateStudentController);
+studentRoutes.delete("/:id", deleteStudentController);
 
-// PATCH /:id
-//    ↓
-// updateStudent
-
-// DELETE /:id
-//    ↓
-// deleteStudent
+export default studentRoutes;

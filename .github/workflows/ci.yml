@@ -1,0 +1,170 @@
+# ============================================================
+# GitHub Actions - Continuous Integration Pipeline
+# ============================================================
+
+# Workflow ka naam
+name: CI Pipeline
+
+
+# ============================================================
+# CI kab run hogi?
+# ============================================================
+
+on:
+
+  # Jab main ya dev branch par code push hoga
+  push:
+    branches:
+      - main
+      - dev
+
+  # Jab main ya dev branch ke against Pull Request banegi
+  pull_request:
+    branches:
+      - main
+      - dev
+
+
+# ============================================================
+# JOBS
+# ============================================================
+
+jobs:
+
+
+  # ==========================================================
+  # CLIENT / FRONTEND JOB
+  # ==========================================================
+
+  client:
+
+    # GitHub ek temporary Ubuntu machine provide karega
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ------------------------------------------------------
+      # STEP 1: Repository ka code GitHub machine par lao
+      # ------------------------------------------------------
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ------------------------------------------------------
+      # STEP 2: Node.js setup karo
+      # ------------------------------------------------------
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+
+          # Abhi Node.js 20 use kar rahe hain
+          node-version: 20
+
+
+      # ------------------------------------------------------
+      # STEP 3: Client dependencies install karo
+      # ------------------------------------------------------
+
+      # npm ci package-lock.json ke according
+      # clean aur exact dependencies install karta hai.
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: ./Client
+
+
+      # ------------------------------------------------------
+      # STEP 4: Client ESLint check
+      # ------------------------------------------------------
+
+      # npm run lint tumhare Client/package.json mein
+      # ESLint command run karega.
+      #
+      # Ye frontend code mein linting/code-quality errors
+      # check karega.
+      - name: Lint client
+        run: npm run lint
+        working-directory: ./Client
+
+
+      # ------------------------------------------------------
+      # STEP 5: Client tests
+      # ------------------------------------------------------
+
+      # Tumhare Client/package.json mein:
+      #
+      # "test": "vitest run"
+      #
+      # Isliye yahan Vitest tests run honge.
+      - name: Test client
+        run: npm test
+        working-directory: ./Client
+
+
+      # ------------------------------------------------------
+      # STEP 6: Client production build
+      # ------------------------------------------------------
+
+      # Tumhare Client/package.json mein:
+      #
+      # "build": "vite build"
+      #
+      # Ye verify karega ke frontend successfully
+      # production build ho sakta hai.
+      - name: Build client
+        run: npm run build
+        working-directory: ./Client
+
+
+
+  # ==========================================================
+  # SERVER / BACKEND JOB
+  # ==========================================================
+
+  server:
+
+    # GitHub ek temporary Ubuntu machine provide karega
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ------------------------------------------------------
+      # STEP 1: Repository ka code GitHub machine par lao
+      # ------------------------------------------------------
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ------------------------------------------------------
+      # STEP 2: Node.js setup karo
+      # ------------------------------------------------------
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+
+          # Backend ke liye bhi Node.js 20
+          node-version: 20
+
+
+      # ------------------------------------------------------
+      # STEP 3: Server dependencies install karo
+      # ------------------------------------------------------
+
+      # Server/package.json aur package-lock.json ke
+      # according dependencies install hongi.
+      - name: Install server dependencies
+        run: npm ci
+        working-directory: ./Server
+
+
+      # ------------------------------------------------------
+      # STEP 4: Server ESLint check
+      # ------------------------------------------------------
+
+      # Backend JavaScript code ko ESLint check karega.
+      - name: Lint server
+        run: npm run lint
+        working-directory: ./Server

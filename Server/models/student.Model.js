@@ -22,6 +22,22 @@ const studentSchema = new mongoose.Schema({
         trim:true,
     },
 
+    email: {
+        type: String,
+        required: [true, "Email is required."],
+        unique: true,
+        trim: true,
+        lowercase: true,
+        match: [/^\S+@\S+\.\S+$/, "Please provide a valid email."],
+    },
+
+    // Optional contact number — empty string when not provided
+    phone: {
+        type: String,
+        default: "",
+        trim: true,
+    },
+
     // We are creating a field called course
     course: {
         type: String,       // Course is a string.
@@ -55,11 +71,3 @@ const Student = mongoose.model("Student", studentSchema);
 
 // Other files mein Student model use karne ke liye export kar rahe hain.
 export default Student;
-
-
-// Schema = Design / Structure
-// Model  = Worker / Database se baat karne wala
-// Example:
-// Student.find()
-// Student.findOne()
-// Student.create()

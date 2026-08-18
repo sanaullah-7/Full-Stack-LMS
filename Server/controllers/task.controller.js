@@ -1,10 +1,17 @@
-import { Task } from "../models/taskModel";
+import {
+    getAllTasksService,
+    getTaskByIdService,
+    getTasksByStudentService,
+    createTaskService,
+    updateTaskService,
+    deleteTaskService
+} from "../services/task.Service.js";
 
 // @desc    Get all tasks
 // @route   GET /api/tasks
 export const getTasks = async (req, res) => {
     try {
-        const tasks = await Task.find().populate("studentId");
+        const tasks = await getAllTasksService();
 
         res.status(200).json({
             success: true,
@@ -12,21 +19,19 @@ export const getTasks = async (req, res) => {
             data: tasks
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({
             success: false,
-            message: "Internal Server Error"
+            message: error.message || "Internal Server Error"
         });
     }
 };
 
 // @desc    Get single task
 // @route   GET /api/tasks/:id
-
 export const getTask = async (req, res) => {
     try {
-        const task = await Task.findById(req.params.id)
-            .populate("studentId");
+        const task = await getTaskByIdService(req.params.id);
 
         if (!task) {
             return res.status(404).json({
@@ -41,10 +46,9 @@ export const getTask = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-
         res.status(500).json({
             success: false,
-            message: "Internal Server Error"
+            message: error.message || "Internal Server Error"
         });
     }
 };
@@ -54,8 +58,7 @@ export const getTask = async (req, res) => {
 export const getTasksByStudent = async (req, res) => {
     try {
         const { studentId } = req.params;
-
-        const tasks = await Task.find({ studentId }).populate("studentId");
+        const tasks = await getTasksByStudentService(studentId);
 
         res.status(200).json({
             success: true,
@@ -64,28 +67,19 @@ export const getTasksByStudent = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-
         res.status(500).json({
             success: false,
-            message: "Internal Server Error"
+            message: error.message || "Internal Server Error"
         });
     }
 };
-
 
 // @desc    Create task
 // @route   POST /api/tasks
 export const createTask = async (req, res) => {
     try {
         const { studentId, title, description, dueDate, status } = req.body;
-
-        const task = await Task.create({
-            studentId,
-            title,
-            description,
-            dueDate,
-            status
-        });
+        const task = await createTaskService({ studentId, title, description, dueDate, status });
 
         res.status(201).json({
             success: true,
@@ -93,29 +87,29 @@ export const createTask = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-
-        res.status(500).json({
+        res.status(400).json({
             success: false,
-            message: "Internal Server Error"
+            message: error.message || "Internal Server Error"
         });
     }
 };
 
 // @desc    Update task
 // @route   PUT /api/tasks/:id
-
 export const updateTask = async (req, res) => {
     try {
         const { id } = req.params;
+        const { studentId, title, description, dueDate, status } = req.body;
+        
+        const updateData = {
+            ...(studentId !== undefined && { studentId }),
+            ...(title !== undefined && { title }),
+            ...(description !== undefined && { description }),
+            ...(dueDate !== undefined && { dueDate }),
+            ...(status !== undefined && { status })
+        };
 
-        const task = await Task.findByIdAndUpdate(
-            id,
-            req.body,
-            {
-                new: true,
-                runValidators: true
-            }
-        );
+        const task = await updateTaskService(id, updateData);
 
         if (!task) {
             return res.status(404).json({
@@ -130,10 +124,9 @@ export const updateTask = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-
         res.status(500).json({
             success: false,
-            message: "Internal Server Error"
+            message: error.message || "Internal Server Error"
         });
     }
 };
@@ -143,8 +136,7 @@ export const updateTask = async (req, res) => {
 export const deleteTask = async (req, res) => {
     try {
         const { id } = req.params;
-
-        const task = await Task.findByIdAndDelete(id);
+        const task = await deleteTaskService(id);
 
         if (!task) {
             return res.status(404).json({
@@ -157,13 +149,11 @@ export const deleteTask = async (req, res) => {
             success: true,
             message: "Task deleted successfully"
         });
-
     } catch (error) {
         console.error(error);
-
         res.status(500).json({
             success: false,
-            message: "Internal Server Error"
+            message: error.message || "Internal Server Error"
         });
     }
 };

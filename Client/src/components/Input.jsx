@@ -1,18 +1,17 @@
-import React from 'react';
-import { LuSearch } from 'react-icons/lu';
 
-const Input = ({ icon, className = '', ...props }) => {
+
+const Input = ({ icon, className = "", ...props }) => {
   return (
-    <div className={`relative ${className}`}>
-      {icon && (
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <span className="text-gray-400">{icon}</span>
+    <div className={`relative w-full ${className}`}>
+      {icon ? (
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+          {icon}
         </div>
-      )}
+      ) : null}
       <input
-        className={`block w-full sm:text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-          icon ? 'pl-10' : 'pl-3'
-        } pr-3 py-2 border shadow-sm`}
+        className={`w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 ${
+          icon ? "pl-10" : ""
+        }`}
         {...props}
       />
     </div>
