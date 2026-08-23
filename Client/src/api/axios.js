@@ -1,12 +1,18 @@
 import axios from "axios";
 import { clearAuthToken, getAuthToken } from "../utils/authToken";
 
+const CLIENT_APP_SECRET = "saylani-lms-client-v1";
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  headers: {
+    "X-App-Client": CLIENT_APP_SECRET,
+  },
 });
 
 api.interceptors.request.use(
   (config) => {
+    config.headers["X-App-Client"] = CLIENT_APP_SECRET;
     const token = getAuthToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

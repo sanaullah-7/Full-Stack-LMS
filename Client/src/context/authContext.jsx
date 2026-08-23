@@ -7,9 +7,18 @@ import {
 } from "../utils/authToken";
 
 export function AuthProvider({ children }) {
-  // Clear any leftover localStorage token from older builds on boot
+  // Check for handover token in URL (e.g. redirected from Student Portal) or session storage
   const [token, setToken] = useState(() => {
     try {
+      if (typeof window !== "undefined") {
+        const searchParams = new URLSearchParams(window.location.search);
+        const urlToken = searchParams.get("token");
+        if (urlToken) {
+          setAuthToken(urlToken);
+          window.history.replaceState({}, document.title, window.location.pathname);
+          return urlToken;
+        }
+      }
       localStorage.removeItem("token");
     } catch {
       // ignore

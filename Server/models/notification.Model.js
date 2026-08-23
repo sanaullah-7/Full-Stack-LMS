@@ -6,6 +6,12 @@ import mongoose from "mongoose";
  */
 const notificationSchema = new mongoose.Schema(
   {
+      studentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Student",
+      default: null,
+      index: true,
+    },
     type: {
       type: String,
       enum: ["STUDENT", "ATTENDANCE", "TEAM", "PROJECT", "TASK"],

@@ -7,6 +7,8 @@ import {
   notifyStudentCreated,
   notifyStudentTeamChange,
 } from "./notification.Service.js";
+import bcrypt from "bcrypt"
+
 
 const ACTIVE_ATTENDANCE_THRESHOLD = 75;
 
@@ -102,37 +104,51 @@ function isValidEmailFormat(email) {
 
 // CREATE STUDENT
 export const createStudent = async (studentData) => {
+
   const { rollNumber, name, course, batch } = studentData;
+
   const email = normalizeEmail(studentData.email);
   const phone = normalizePhone(studentData.phone);
-  const incomingTeamId = resolveIncomingTeamId(studentData);
 
+  const incomingTeamId = resolveIncomingTeamId(studentData);
+  // 1. Basic validation
   if (!rollNumber || !name || !course || !batch) {
     throw new Error("All fields are required");
   }
-
+ // 2. Email validation
   if (!email) {
     throw new Error("Email is required.");
   }
   if (!isValidEmailFormat(email)) {
     throw new Error("Please provide a valid email.");
   }
-
+//  / 3. Duplicate roll number check
   const existStudent = await Student.findOne({ rollNumber });
   if (existStudent) {
     throw new Error("User already exists");
   }
-
+// / 4. Duplicate email check
   const existEmail = await Student.findOne({ email });
   if (existEmail) {
     throw new Error("Email already exists.");
   }
 
+  // 5. Get default student password from .env or studentData
+  const defaultPassword =
+    process.env.DEFAULT_STUDENT_PASSWORD || studentData.password || "password123";
+
+  // 6. Hash the default password
+  const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+
+
+
+// 7. Team validation
   const nextTeamId = incomingTeamId || null;
   if (nextTeamId) {
     await assertTeamExists(nextTeamId);
   }
-
+console.log("Hashed password2:", hashedPassword);
+// 8. Create student
   const student = await Student.create({
     rollNumber,
     name,
@@ -141,8 +157,10 @@ export const createStudent = async (studentData) => {
     course,
     batch,
     team_id: nextTeamId,
+    password: hashedPassword,
   });
 
+  // 9. Sync team membership
   if (nextTeamId) {
     await syncTeamMembership(student._id, null, nextTeamId);
   }
@@ -151,10 +169,14 @@ export const createStudent = async (studentData) => {
     "team_id",
     "name",
   );
+
+
+  // 11. Notifications
   await notifyStudentCreated(populated);
   if (populated.team_id) {
     await notifyStudentTeamChange(populated, populated.team_id);
   }
+
   return populated;
 };
 

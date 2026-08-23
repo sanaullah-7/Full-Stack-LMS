@@ -9,6 +9,7 @@ import {
 
 // CREATE STUDENT
 export const createStudentController = async (req, res) => {
+  
   try {
     const student = await createStudent(req.body);
     res.status(201).json({ message: "Student Created successfully", student });

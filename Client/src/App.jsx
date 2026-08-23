@@ -27,13 +27,21 @@ function RootRedirect() {
  * then shows the login form.
  */
 function LoginRoute() {
-  const { logout } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    logout();
+    const searchParams = new URLSearchParams(window.location.search);
+    const hasHandover = searchParams.get("token");
+    if (!hasHandover && !isAuthenticated) {
+      logout();
+    }
     // Only on first enter of /login — do not re-run after successful login(token)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return <Login />;
 }

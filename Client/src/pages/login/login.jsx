@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginAdmin } from "../../Services/auth.services";
+import { loginAdmin, loginStudent } from "../../Services/auth.services";
 import { useAuth } from "../../context/authContextObject";
+import { getStudentPortalUrl } from "../../utils/portalUrls";
 import toast from "react-hot-toast";
 import {
   Eye,
@@ -11,6 +12,8 @@ import {
   UsersRound,
   FolderKanban,
   ListTodo,
+  ShieldCheck,
+  GraduationCap,
 } from "lucide-react";
 
 const HIGHLIGHTS = [
@@ -24,31 +27,60 @@ const HIGHLIGHTS = [
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("admin"); // 'admin' | 'student'
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!identifier.trim() || !password.trim()) {
+      toast.error(
+        role === "admin"
+          ? "Please enter your admin email and password."
+          : "Please enter your roll number/email and password."
+      );
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const data = await loginAdmin(email, password);
-      const token = data?.token;
-      if (!token) {
-        throw new Error("Login succeeded but no token was returned");
-      }
+      if (role === "admin") {
+        const data = await loginAdmin(identifier.trim(), password);
+        const token = data?.token;
+        if (!token) {
+          throw new Error("Login succeeded but no token was returned");
+        }
 
-      // Must update AuthContext — ProtectedRoute reads this, not only localStorage
-      login(token);
-      toast.success("Login successfully!");
-      navigate("/dashboard", { replace: true });
+        // Update AuthContext and navigate to dashboard
+        login(token);
+        toast.success("Welcome Admin! Logged in successfully.");
+        navigate("/dashboard", { replace: true });
+      } else {
+        // Logging in as Student from Admin Page
+        const data = await loginStudent(identifier.trim(), password);
+        const token = data?.token;
+        if (!token) {
+          throw new Error("Student authentication succeeded but token missing");
+        }
+
+        toast.success("Student verified! Redirecting to Student Portal...");
+        const targetUrl = `${getStudentPortalUrl()}/login?token=${encodeURIComponent(
+          token
+        )}&role=student`;
+
+        // Smooth brief transition then silent redirection
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 500);
+      }
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
           error.message ||
-          "Invalid Email or password",
+          "Invalid credentials. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -77,9 +109,6 @@ export default function Login() {
             <h2 className="mt-2 text-3xl font-bold tracking-tight xl:text-4xl">
               Bootcamp LMS
             </h2>
-            {/* <p className="mt-2 text-base leading-relaxed text-blue-100/85">
-              One clear dashboard to run your whole bootcamp with confidence.
-            </p> */}
           </div>
 
           {/* Logo — uses leftover space only */}
@@ -116,46 +145,89 @@ export default function Login() {
       {/* Right login form */}
       <div className="flex min-h-dvh flex-col justify-center bg-[var(--color-background)] px-6 py-8 sm:px-12 lg:min-h-0 lg:px-16 xl:px-24">
         <div className="mx-auto w-full max-w-[420px] rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-md)] sm:p-8">
+          
+          {/* Role Switcher Slider */}
+          <div className="mb-6 flex rounded-xl bg-[var(--color-background)] p-1 border border-[var(--color-border)]">
+            <button
+              type="button"
+              onClick={() => {
+                setRole("admin");
+                setIdentifier("");
+              }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                role === "admin"
+                  ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-sm"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              }`}
+            >
+              <ShieldCheck size={15} />
+              Admin Login
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRole("student");
+                setIdentifier("");
+              }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                role === "student"
+                  ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-sm"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              }`}
+            >
+              <GraduationCap size={15} />
+              Student Login
+            </button>
+          </div>
+
           <h2 className="text-2xl font-bold tracking-tight text-[var(--color-text)] sm:text-3xl">
-            Admin Login
+            {role === "admin" ? "Admin Login" : "Student Login"}
           </h2>
           <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-            Sign in to open your bootcamp command center.
+            {role === "admin"
+              ? "Sign in to open your bootcamp command center."
+              : "Enter credentials to access your Student Portal."}
           </p>
 
           <form onSubmit={handleLogin} className="mt-7 flex flex-col gap-4">
             <div>
               <label
-                htmlFor="admin-email"
+                htmlFor="user-identifier"
                 className="mb-1.5 block text-[13px] font-medium text-[var(--color-text)]"
               >
-                Email
+                {role === "admin" ? "Admin Email" : "Roll Number or Email"}
               </label>
               <input
-                id="admin-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@bootcamp.dev"
+                id="user-identifier"
+                type={role === "admin" ? "email" : "text"}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder={
+                  role === "admin"
+                    ? "admin@smitlms.com"
+                    : "e.g. 100234 or student@smitlms.com"
+                }
                 className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3.5 py-2.5 text-sm text-[var(--color-text)] placeholder-[var(--color-outline)]/50 transition-all focus:border-[var(--color-primary)] focus:bg-[var(--color-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                required
               />
             </div>
 
             <div>
               <label
-                htmlFor="admin-password"
+                htmlFor="user-password"
                 className="mb-1.5 block text-[13px] font-medium text-[var(--color-text)]"
               >
                 Password
               </label>
               <div className="relative flex items-center">
                 <input
-                  id="admin-password"
+                  id="user-password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] py-2.5 pr-10 pl-3.5 text-sm text-[var(--color-text)] placeholder-[var(--color-outline)]/60 transition-all focus:border-[var(--color-primary)] focus:bg-[var(--color-surface)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                  required
                 />
                 <button
                   type="button"
@@ -177,7 +249,13 @@ export default function Login() {
               disabled={isLoading}
               className="mt-2 w-full cursor-pointer rounded-lg bg-[var(--color-primary)] py-3 text-sm font-semibold text-[var(--color-on-primary)] transition-all hover:bg-[var(--color-on-primary-container)] hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading
+                ? role === "admin"
+                  ? "Signing in to Admin..."
+                  : "Authenticating Student..."
+                : role === "admin"
+                ? "Sign in as Admin"
+                : "Sign in as Student"}
             </button>
           </form>
         </div>

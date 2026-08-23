@@ -1,0 +1,50 @@
+Part 6
+const student =
+
+= database se returned student ko variable mein store karo.
+
+So:
+
+const student = await getStudentMe(req.student.id);
+
+ka human-language meaning:
+
+"Middleware ne jis student ko authenticate kiya hai, uski ID lo aur service ke through database se uska complete safe profile fetch karo."
+
+11. Ye middleware aur service ka difference samjho
+
+Ye tumhare MVC architecture ke liye bohot important hai.
+
+Middleware
+
+Middleware ka kaam:
+
+"Ye student kaun hai?"
+
+Authentication:
+
+JWT verify
+   ↓
+student identify
+   ↓
+req.student
+Service
+
+Service ka kaam:
+
+"Ab is student ka database data lao."
+
+Database:
+
+Student.findById()
+Controller
+
+Controller ka kaam:
+
+Request lo
+   ↓
+Service call karo
+   ↓
+Response bhejo
+
+Isliye responsibilities separate hain.

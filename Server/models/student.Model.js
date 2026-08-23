@@ -12,6 +12,7 @@ const studentSchema = new mongoose.Schema({
         unique: true,       // Two students cannot have the same roll number.
         min:100000,
         max:999999,
+        trim: true,
         index: true,//An index helps MongoDB find roll numbers faster.
     },
 
@@ -56,6 +57,12 @@ const studentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,// team_id ke andar Team ki MongoDB ObjectId store hogi.
         ref: "Team", //: This tells Mongoose that this ObjectId belongs to the Team model.
         default:null,//If studetn have no team is assigned, the value will be null.
+    },
+    
+    password:{
+        type:String,
+        required:true,
+        minlength:8,
     },
 
 },

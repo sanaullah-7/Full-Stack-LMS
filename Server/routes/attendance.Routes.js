@@ -14,7 +14,7 @@ attendanceRoutes.post("/", markAttendanceController);
 
 // Static GET routes MUST be registered before "/:date"
 attendanceRoutes.get("/stats/overall", getOverallAttendanceStatusController);
-attendanceRoutes.get("/student/:studentId", getStudentAttendanceHistoryController);
+attendanceRoutes.get("/student/:studentId", getStudentAttendanceHistoryController);//done
 
 // Get attendance by date (YYYY-MM-DD)
 attendanceRoutes.get("/:date", getAttendanceByDateController);

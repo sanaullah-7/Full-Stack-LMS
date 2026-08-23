@@ -8,10 +8,12 @@ const projectSchema = new mongoose.Schema({
     teamId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Team',
-        default: null
+        default: null,
+        index: true,
     },
     description:{
-        type: String
+        type: String,
+        trim: true,
     },
     dueDate:{
         type: Date,
