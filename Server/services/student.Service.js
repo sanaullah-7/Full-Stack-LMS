@@ -133,14 +133,12 @@ export const createStudent = async (studentData) => {
     throw new Error("Email already exists.");
   }
 
- // 5. Get default student password from .env
-const defaultPassword = process.env.DEFAULT_STUDENT_PASSWORD;
+  // 5. Get default student password from .env or studentData
+  const defaultPassword =
+    process.env.DEFAULT_STUDENT_PASSWORD || studentData.password || "password123";
 
-if (!defaultPassword) {
-  throw new Error("Default student password is not configured");
-}
-// 6. Hash the default password
-const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+  // 6. Hash the default password
+  const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
 
 

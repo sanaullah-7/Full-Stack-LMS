@@ -1,21 +1,31 @@
 import { getStudentMe, loginStudent,getStudentAttendanceHistory, getStudentDashboard, getMyTasks, updateMyTaskStatus, getMyProjects, getMyTeam, getMyNotifications, changeStudentPassword, markAllNotificationsAsRead } from "./studentAuth.Service.js";
+import { unifiedLogin } from "../services/unifiedAuth.Service.js";
 
 export const loginStudentController = async (req , res)=>{
     try {
-        const {email , password} = req.body;
+        const {email, identifier, rollNumber, password} = req.body;
+        const loginIdentifier = identifier || email || rollNumber;
 
-        const data = await loginStudent(email , password);
-        res.status(200).json({
-            success:true,
-            message:"Student Login Sucessfully",
+        if (!loginIdentifier || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Roll Number/Email and password are required!",
+            });
+        }
+
+        const data = await unifiedLogin(loginIdentifier, password);
+        return res.status(200).json({
+            success: true,
+            message: `${data.role === "admin" ? "Admin" : "Student"} Login Successfully`,
             ...data,
-        }) 
+        });
     }
      catch (error)
       {
         return res.status(401).json({
-            message: error.message,
-        })
+            success: false,
+            message: error.message || "Invalid credentials",
+        });
     }
 }
 
@@ -78,7 +88,7 @@ export const getStudentDashboardController =  async(req, res)=>{
  
     } catch (error) 
     {
-        return res.status(4014).json({
+        return res.status(500).json({
             success:false,
             message:error.message
         })
@@ -198,8 +208,8 @@ export const getMyTeamController = async(req , res)=>{
         const team = await getMyTeam(studentId)
 
         return res.status(200).json({
-            scuess:true,
-            messgae:"Student Team fetch Sucessfully",
+            success:true,
+            message:"Student Team fetched successfully",
             team,
         })
         

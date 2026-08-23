@@ -1,5 +1,19 @@
 node_modules/
 .env
+.env.*
+!.env.example
 .DS_Store
 dist/
 build/
+
+# Scripts & seed files
+scripts/
+Server/scripts/
+
+# Legacy static portal
+student-portal/
+
+# Markdown documentation files except README
+*.md
+!README.md
+!**/README.md

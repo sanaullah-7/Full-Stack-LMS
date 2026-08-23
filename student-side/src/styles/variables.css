@@ -1,0 +1,79 @@
+/* ==========================================================================
+   StudyFlow — Student Portal Design System Tokens
+   ========================================================================== */
+
+:root {
+  /* Colors — SMIT Blue Brand */
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --border: rgba(13, 27, 42, 0.06);
+  --text: #0F172A;
+  --text-muted: #64748B;
+  
+  --accent: #1B75BB;
+  --accent-mid: #1562A0;
+  --accent-lite: #D6E8F7;
+  
+  --success: #10B981;
+  --warn: #F59E0B;
+  --warn-lite: #FEF3C7;
+  --danger: #EF4444;
+  --danger-lite: #FEE2E2;
+  --clay: #0E9E8E;
+  --clay-lite: #CCFBF1;
+
+  /* Typography */
+  --font-display: 'Poppins', system-ui, sans-serif;
+  --font-body: 'Poppins', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'IBM Plex Mono', monospace;
+
+  /* Spacing / shape */
+  --radius-card: 12px;
+  --radius-btn: 6px;
+  --radius-pill: 999px;
+  
+  /* Shadows */
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.03);
+  --shadow-hover: 0 4px 8px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(15, 23, 42, 0.06);
+
+  /* Easing */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Layout */
+  --sidebar-w: 240px;
+  --topbar-h: 56px;
+}
+
+/* ==========================================================================
+   Tailwind CSS v4 Theme Bridge
+   ========================================================================== */
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  
+  --color-accent: var(--accent);
+  --color-accent-mid: var(--accent-mid);
+  --color-accent-lite: var(--accent-lite);
+  
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-warn-lite: var(--warn-lite);
+  --color-danger: var(--danger);
+  --color-danger-lite: var(--danger-lite);
+  --color-clay: var(--clay);
+  --color-clay-lite: var(--clay-lite);
+  
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+  
+  --radius-card: var(--radius-card);
+  --radius-btn: var(--radius-btn);
+  --radius-pill: var(--radius-pill);
+  
+  --shadow-card: var(--shadow-card);
+  --shadow-hover: var(--shadow-hover);
+}

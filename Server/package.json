@@ -9,7 +9,9 @@
   "scripts": {
     "lint": "eslint .",
     "start": "nodemon server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "seed:admin": "node scripts/seedAdmin.js",
+    "seed:all": "node scripts/seedAllLMSData.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
