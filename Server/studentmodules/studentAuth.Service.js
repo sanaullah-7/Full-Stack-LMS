@@ -6,6 +6,10 @@ import { Task } from "../models/taskModel.js";
 import Project from "../models/project.Model.js";
 import Notification from "../models/notification.Model.js";
 
+// await
+// Asynchronous operation complete hone tak wait karta hai.
+
+// Is function ka purpose student ka login verify karna hai.
 export const loginStudent = async (email , password)=>{
 //    normalizedEmail => frontline denfanse
 // const normalizedEmail = String(email || "").trim().toLowerCase();
@@ -13,7 +17,8 @@ export const loginStudent = async (email , password)=>{
     if (!student) {
   throw new Error("Invalid email or password");
 }
-
+                              //password: user ka bheja hua password.
+                              // student.password: database mein saved hashed password.
     const isPasswordCorrect = await bcrypt.compare(password,student.password );
     if(!isPasswordCorrect){
         throw new Error("Invalid Email or Password")
@@ -33,38 +38,42 @@ export const loginStudent = async (email , password)=>{
 
 };
 
-// Mujhe current student ka data do."
+// Is function ka purpose current logged-in student ka profile lana hai.
 export const getStudentMe = async(studentId)=>{
      
     // MongoDB mein Student collection ke andar is ID wala student find karo.
     const student = await Student.findById(studentId)
     .select("-password")//Database se student find karo, lekin password field response/data mein mat lao.
+    // populate: related document ka data bhi lata hai.
+    // team_id: student ke andar team ka reference.
     .populate("team_id", "name"); //Mongoose ko bolta hai:
     //team_id ke through related Team document find karo aur uski name bhi le aao.
 
     if(!student){
         throw new Error("Student not found")
     }
-    // Service database se jo student mila hai woh controller ko wapas bhej deta hai.
+    // Student ka profile controller ko wapas bhej diya jata hai.
     return student;
 }
 
 
-// Get Students Attendace History
+// Is function ka purpose student ki attendance history lana hai.
 export const getStudentAttendanceHistory = async(studentId)=>{
 
     const student = await Student.findById(studentId);
     if(!student){
         throw new Error("Student not found")
     }
-
-    const attendance = await Attendance.find({student_id:studentId}).sort({date : -1});
+                                        //  student_id: studentId: sirf isi student ki attendance.
+    const attendance = await Attendance.find({student_id:studentId})
+    // -1: descending order.
+    .sort({date : -1});//.sort({ date: -1 }): date ke hisaab se latest record pehle.
 
     return attendance;
 }
 
 
-// student dashboard
+// Ye function student dashboard ka complete data prepare karta hai.
 export const  getStudentDashboard = async(studentId)=>{
 
     //1. logged-in student database se find karo 
@@ -81,7 +90,8 @@ export const  getStudentDashboard = async(studentId)=>{
 
     //  attendance counts
     const totalDays = attendance.length;
-
+// .filter(): array mein se matching records nikalta hai.
+// record: attendance ka ek record.
     const presentDays = attendance.filter((record)=> record.status === "Present").length;
     const absentDays = attendance.filter((record)=> record.status === "Absent").length;
     const leaveDays = attendance.filter((record)=> record.status === "Leave").length;
@@ -116,13 +126,13 @@ export const  getStudentDashboard = async(studentId)=>{
 // Get only logged-in student's tasks
 export const getMyTasks = async (studentId) => {
   const tasks =  await Task.find({ studentId })
-    // .populate(studentPopulate)
+    // Latest created task pehle show hoga.
     .sort({ createdAt: -1 })
     .lean();
     return tasks;
 };
 
-// update task stastus
+// Ye function task ka status update karta hai.
 export const updateMyTaskStatus = async (
   studentId,
   taskId,
@@ -134,7 +144,7 @@ export const updateMyTaskStatus = async (
     "Completed",
   ];
 
-  // Check karo status allowed hai ya nahi
+// .includes(): check karta hai ke status array mein exist karta hai ya nahi.
   if (!allowedStatuses.includes(status)) {
     throw new Error(
       "Invalid status. Use Pending, In Progress or Completed."
@@ -148,20 +158,25 @@ export const updateMyTaskStatus = async (
   // Iska matlab:
   // student sirf APNA task update kar sakta hai.
   const task = await Task.findOneAndUpdate(
-    {
+  // Ye security ke liye bohat important hai:
+// Task ki ID match honi chahiye.
+// Student ki ID bhi match honi chahiye.
+// Is se student kisi doosray student ka task update nahi kar sakta.
+    {                         
       _id: taskId,
       studentId: studentId,
     },
+    // $set: field ki value update karta hai.
     {
       $set: {
-        status: status,
+        status: status,//status: status: task ka purana status naye status se replace.
       },
     },
     {
-      new: true,
-      runValidators: true,
+      new: true,//new: true: updated task return karo.
+      runValidators: true,//runValidators: true: model ke validation rules check karo.
     }
-  ).lean();
+  ).lean();//Updated task ko simple JavaScript object mein convert karta hai.
 
   if (!task) {
     throw new Error("Task not found");
@@ -185,12 +200,16 @@ export const getMyProjects = async (studentId) => {
   }
 
   // 3. Student kisi team mein assigned hai ya nahi?
+  // Agar student kisi team mein nahi hai to empty array return hoti hai.
   if (!student.team_id) {
     return [];
   }
 
   // 4. Student ki team ke projects find karo
   const projects = await Project.find({
+    // Student ki team_id li jati hai.
+// Us team ke projects find kiye jate hain.
+// Latest project pehle show hota hai.
     teamId: student.team_id,
   }).sort({ createdAt: -1 });
 
@@ -209,10 +228,11 @@ export const getMyTeam = async(studentId)=>{
     throw new Error("Student not found")
   }
    // Student exist karta hai lekin team assign nahi hai
+  //  Student exist karta hai lekin team assigned nahi hai to null return hota hai.
     if(!student.team_id){
       return null
     }
-    // Student ki team return karo
+    // Student ki Team ka data return hota hai.
     return student.team_id;
 }
 
@@ -223,6 +243,7 @@ export const getMyNotifications = async (studentId) => {
   const notifications = await Notification.find({
     studentId: studentId,
   })
+  // Latest notification pehle aati hai.
     .sort({ createdAt: -1 })
     .lean();
 
@@ -235,25 +256,26 @@ export const markAllNotificationsAsRead = async (studentId) => {
   if (!studentId) {
     throw new Error("Student ID is required");
   }
-
+// updateMany: ek se zyada database records update karta hai.
   const result = await Notification.updateMany(
     {
-      studentId: studentId,
-      read: false,
+      studentId: studentId,//Jo isi student ki hain.
+      read: false,//Jinka read status false hai.
     },
     {
+      // Selected notifications ko read mark karta hai.
       $set: {
         read: true,
       },
     }
   );
-
+// Kitni notifications update hui hain, woh count return karta hai.
   return {
     modifiedCount: result.modifiedCount,
   };
 };
 
-// change password
+// Password change karne wala function hai
 export const changeStudentPassword = async (studentId,currentPassword,newPassword,confirmPassword)=>{
   
   // 1. Find the student by ID
@@ -264,32 +286,37 @@ export const changeStudentPassword = async (studentId,currentPassword,newPasswor
 
   // 2. Compare incoming currentPassword with the database password
   const passwordCorrect = await bcrypt.compare(currentPassword, student.password);
-
+// // Purana password ghalat ho to password change nahi hota.
   if(!passwordCorrect){
     throw new Error("Current password is incorrect")
   }
 
   // 3. Validate new password length
+  
   if(!newPassword || newPassword.length < 8){
     throw new Error("New Passowrd must be at least 8 characters");
   }
 
   //  NEW TYPO CHECK: Confirm new passwords match perfectly
+  // New password aur confirm password same hone chahiye
   if(newPassword !== confirmPassword){
     throw new Error("New Passowrd and Confirm password do not match")
   }
-
+// Check karta hai ke naya password purane password jaisa to nahi.
   if(currentPassword === newPassword){
     throw new Error ("New password cannot be the same as your current password")
   }
 
 
   // 4. Hash and save the new password
+                                //  bcrypt.hash: new password ko secure hash mein convert karta hai.
+                                // 10: password security level.
   const hashedPassword = await  bcrypt.hash(newPassword, 10);
-  student.password = hashedPassword;
-  await student.save();
+  // Student object mein naya hashed password set karta hai.
+  student.password = hashedPassword;//hashedPassword: encrypted form.
+  await student.save();//Updated student ko database mein save karta hai.
 
-  return true;
+  return true; //Password successfully change hone ka signal return karta hai.
 }
 
 
